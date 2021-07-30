@@ -1,11 +1,12 @@
 # Author: Lalitha Viswanathan
-# Calculate Depth of coverage GATK Utilities
+# Calculate Depth of coverage GATK Utilities\
+# Affiliation: Stanford Health Care
 from itertools import chain
 from typing import Union
 
 import numpy as np
 
-
+########################################################
 def depthofcoveragesamplesummaryandsampleintervalsummary(filename: str) -> dict[str, dict]:
     """
 
@@ -42,7 +43,7 @@ def depthofcoveragesamplesummaryandsampleintervalsummary(filename: str) -> dict[
                         depthofcoverage['granularQ3'][vals[0]] = float(vals[7])
             except StopIteration:
                 break
-
+    ########################################################
     # Binning for 10xcoverage bins
     unique, counts = np.unique(depthofcoverage['coverage10x'].values(), return_counts=True)
     unique_and_counts = dict(zip(unique, counts))
@@ -52,7 +53,7 @@ def depthofcoveragesamplesummaryandsampleintervalsummary(filename: str) -> dict[
     hist = np.histogram(data, bins=bins)[0]
     for r in zip(bins, bins[1:], hist):
         depthofcoverage['coverage10xbins'][str(r[0]) + "-" + str(r[1])] = r[2]
-
+    ########################################################
     # Binning for mean coverage
     unique, counts = np.unique(depthofcoverage['meancoverage'].values(), return_counts=True)
     unique_and_counts = dict(zip(unique, counts))
@@ -62,7 +63,7 @@ def depthofcoveragesamplesummaryandsampleintervalsummary(filename: str) -> dict[
     hist = np.histogram(data, bins=bins)[0]
     for r in zip(bins, bins[1:], hist):
         depthofcoverage['meancoveragebins'][str(r[0]) + "-" + str(r[1])] = r[2]
-
+    ########################################################
     # Binning for median coverage
     unique, counts = np.unique(depthofcoverage['mediancoverage'].values(), return_counts=True)
     unique_and_counts = dict(zip(unique, counts))

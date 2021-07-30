@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
 # Author: Lalitha Viswanathan
 # GATK Results Parser
-#
-import re, json
+# Affiliation: Stanford Health Care
+import re
+import json
 from argparse import ArgumentParser
-from typing import Union, Optional, Any
+from typing import Any
 
-import numpy as np
-from itertools import chain
 # import gatkparserutilities as gatkp
 
 ########################################################
 from gatkparserutilities.gatkparserutilities import depthofcoverage30, depthofcoverage0, \
     depthofcoverage20, \
     depthofcoverage10
+import varianteval.varianteval as veval
 
-
-def generic_parser(filename, tablename) -> object:
+def generic_parser(filename, tablename) -> json:
     """
 
     :param filename:
@@ -26,8 +25,8 @@ def generic_parser(filename, tablename) -> object:
     """
     results = None
 
-    with open(filename) as f:
-        for line in f:
+    with open(filename) as file:
+        for line in file:
             if line.startswith('#:GATKTable:%s' % tablename):
 
                 # Capture the table name and description from the second line.
@@ -39,52 +38,56 @@ def generic_parser(filename, tablename) -> object:
                 tabledescription: str = m.groups()[1]
 
                 # Capture the column header info
-                nextrow: str = f.readline().rstrip()
-                tableheader: list[str] = re.split('\s+', nextrow)
+                nextrow: str = file.readline().rstrip()
+                tableheader: list[str] = re.split('\\s+', nextrow)
                 tableheader.pop(0)  # Drop the table name
 
                 # Capture data from all rows that start with the current tablename
                 rows = []
-                nextrow: str = f.readline().rstrip()
+                nextrow: str = file.readline().rstrip()
                 while nextrow.startswith(tablename):
-                    rowdata: list[str] = re.split('\s+', nextrow)
+                    rowdata: list[str] = re.split("\\s+", nextrow)
                     rowdata.pop(0)  # Drop the table name from the row
                     rows.append(rowdata)  # Save data to list of rows
-                    nextrow: str = f.readline().rstrip()
+                    nextrow: str = file.readline().rstrip()
 
                 results = {
                     'description': tabledescription,
                     'header': tableheader,
                     'rows': rows
                 }
-    return results
+    if results:
+        return results
+    else:
+        raise Exception("GATK Depth of Coverage results not formed correctly")
 
 
 ########################################################
 
 ########################################################
-def depthofcoverageparser(gatkoutputfilename, parsertype):
+def depthofcoverageparser(gatkoutputfilename: str, parsertype) -> json:
     """
 
+    :return:
     :param gatkoutputfilename:
     :param parsertype:
     :return:
     """
-    parsefxn: str = None
+    parsefunction: str = None
     if parsertype == 'depthofcoveragembq20_sample_summary':
-        parsefxn = 'depthofcoverage20'
+        parsefunction = 'depthofcoverage20'
     if parsertype == 'depthofcoveragembq20_sample_interval_summary':
-        parsefxn = 'depthofcoverage20'
-    depthofcoverage: Any = parsefxn(gatkoutputfilename)
-    if depthofcoverage:
+        parsefunction = 'depthofcoverage20'
+    depthofcoveragefunctioncall: Any = parsefunction(gatkoutputfilename)
+    if depthofcoveragefunctioncall:
         # ['coverage10x', 'granularQ1', 'mediancoverage', 'coverage10xbins',
         # 'meancoverage', 'mediancoveragebins', 'granularQ3', 'meancoveragebins']
-        del depthofcoverage['depthofcoverage20']['coverage10x']
-        del depthofcoverage['depthofcoverage20']['granularQ1']
-        del depthofcoverage['depthofcoverage20']['mediancoverage']
-        del depthofcoverage['depthofcoverage20']['meancoverage']
-        del depthofcoverage['depthofcoverage20']['granularQ3']
-        return json.dumps(depthofcoverage)
+        del depthofcoveragefunctioncall['depthofcoverage20']['coverage10x']
+        del depthofcoveragefunctioncall['depthofcoverage20']['granularQ1']
+        del depthofcoveragefunctioncall['depthofcoverage20']['mediancoverage']
+        del depthofcoveragefunctioncall['depthofcoverage20']['meancoverage']
+        del depthofcoveragefunctioncall['depthofcoverage20']['granularQ3']
+        return json.dumps(depthofcoveragefunctioncall)
     else:
         raise Exception('Depth of Coverage sample interval summary not parsed correctly')
 
@@ -116,7 +119,7 @@ if __name__ == '__main__':
     if args.parsertype == 'depthofcoveragembq30_sample_interval_summary':
         parsefxn = depthofcoverage30
     if args.parsertype == 'varianteval':
-        parsefxn = varianteval
+        parsefxn = veval.varianteval
     depthofcoverage: dict = parsefxn(args.gatkoutputfilename)
     # print "####", depthofcoverage['depthofcoverage20'].keys()
     print(" 10x coverage bins")

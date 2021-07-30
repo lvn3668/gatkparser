@@ -1,8 +1,9 @@
 # Author Lalitha Viswanathan
-# Utility for variant eval (GATK parsing results)
+# Utility for variant evaluation (GATK parsing results)
+# Affiliation: Stanford Health Care
 from typing import Optional, Union
 import re
-from gatk.gatkparser import generic_parser
+from gatk.gatkparser_main import generic_parser
 
 
 def varianteval_CountVariants(filename: str) -> dict:
@@ -53,9 +54,10 @@ def varianteval_CountVariants(filename: str) -> dict:
     results = {resultsname: {}}
     results[resultsname]['header'] = header
     results[resultsname]['rows'] = rows
-
-    return results
-
+    if results:
+        return results
+    else:
+        raise Exception("Variant Evaluation results from GATK Parser file not parsed correctly")
 
 ########################################################
 def varianteval_dbsnp_CountVariants(filename: str) -> dict:
