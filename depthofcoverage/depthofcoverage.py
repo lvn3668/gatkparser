@@ -1,10 +1,11 @@
 # Author: Lalitha Viswanathan
-# Calculate Depth of coverage GATK Utilities\
+# Calculate Depth of coverage GATK Utilities
 # Affiliation: Stanford Health Care
 from itertools import chain
 from typing import Union
 
 import numpy as np
+
 
 ########################################################
 def depthofcoveragesamplesummaryandsampleintervalsummary(filename: str) -> dict[str, dict]:
@@ -13,7 +14,8 @@ def depthofcoveragesamplesummaryandsampleintervalsummary(filename: str) -> dict[
     :rtype: object
     """
     resultsdata: dict[str, Union[list, list[str]]] = {
-        'rows': []
+        'header': list[str],
+        'rows': list[str]
     }
     depthofcoverage: dict[str, dict] = {
         'coverage10x': {},
@@ -80,6 +82,5 @@ def depthofcoveragesamplesummaryandsampleintervalsummary(filename: str) -> dict[
         return depthofcoverage
     else:
         raise Exception('Depth of Coverage sample interval summary not parsed correctly')
-
 
 ########################################################
